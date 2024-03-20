@@ -2,8 +2,12 @@ import FullPageLoader from '../components/FullPageLoader.jsx';
 import { useState } from 'react';
 import { auth } from "../firebase/config.js"
 import { createUserWithEmailAndPassword, sendPasswordResetEmail, signInWithEmailAndPassword } from "firebase/auth";
+import { useDispatch } from 'react-redux';
+import { setUser } from '../store/usersSlice.js';
+
 
 function LoginPage() {
+  const dispatch = useDispatch()
   const [isLoading, setIsLoading] = useState(false);
   const [loginType, setLoginType] = useState('login');
   const [userCredentials, setUserCredentials] = useState({});
@@ -21,6 +25,7 @@ function LoginPage() {
         // Signed up 
         const user = userCredential.user;
         console.log(user);
+        dispatch(setUser({id: userCredential.user.uid, email: userCredential.user.email}))
       })
       .catch((error) => {
         const errorCode = error.code;
@@ -40,6 +45,7 @@ function LoginPage() {
       .then((userCredential) => {
         // Signed in 
         const user = userCredential.user;
+        dispatch(setUser({id: userCredential.user.uid, email: userCredential.user.email}))
         console.log(user);
         console.log(user.uid);
       })
@@ -55,9 +61,10 @@ function LoginPage() {
     const email = prompt("Enter your email");
     sendPasswordResetEmail(auth, email)
     alert("Email sent! Check your inbox for password reset instrutions.")
+    
   }
 
-  return (
+  return ( 
     <>
       {isLoading && <FullPageLoader></FullPageLoader>}
       <div className="container login-page">
@@ -90,7 +97,6 @@ function LoginPage() {
                 <button onClick={(e) => handleLogin(e)} className="active btn btn-block">Login</button>
                 :
                 <button onClick={(e) => handleSignUp(e)} className="active btn btn-block" >Sign Up</button>
-
             }
 
             {error &&
@@ -99,8 +105,6 @@ function LoginPage() {
 
               </div>
             }
-
-
 
             <p onClick={handlePasswordReset} className="forgot-password">Forgot Password?</p>
           </form>
